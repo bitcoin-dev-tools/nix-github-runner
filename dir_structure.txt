@@ -1,0 +1,23 @@
+nix-github-runner/
+├── flake.nix
+├── hosts/
+│   └── ax52/
+│       ├── configuration.nix
+│       ├── disk-config.nix
+│       └── hardware.nix
+├── modules/
+│   ├── core/
+│   │   ├── default.nix
+│   │   ├── nix.nix
+│   │   └── system.nix
+│   ├── services/
+│   │   ├── default.nix
+│   │   ├── github-runner.nix
+│   │   └── ssh.nix
+│   ├── users/
+│   │   ├── default.nix
+│   │   └── home.nix
+│   └── tools/
+       ├── default.nix
+       ├── development.nix
+       └── system.nix
