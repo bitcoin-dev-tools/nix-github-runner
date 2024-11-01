@@ -12,9 +12,23 @@ $ nix-shell -p nixos-anywhere
 [nix-shell:~]$ RUNNER_TOKEN=<github runner token> nixos-anywhere --flake .#ax52 root@<ip_address>
 ```
 
+Or using `just`:
+
+```bash
+just deploy ax52 <host> <token>
+```
+
 ## Update
+
+- Stage or commit changes
 
 ```bash
 $ nix-shell -p nixos-rebuild
 [nix-shell:~]$ RUNNER_TOKEN=<github runner token> nixos-rebuild switch --flake .#ax52 --target-host root@<ip_address>
+```
+
+Or using `just`:
+
+```bash
+just rebuild ax52 <host> <token>
 ```
