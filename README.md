@@ -1,4 +1,6 @@
-# NixOS benchmarking setup
+# NixOS GitHub runner
+
+A configuration to deploy a NixOS GitHub self-hosted runner.
 
 ## Deploy
 

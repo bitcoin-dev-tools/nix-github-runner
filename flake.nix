@@ -8,18 +8,6 @@
   outputs = { nixpkgs, disko, home-manager, ... }: {
     formatter.x86_64-linux = nixpkgs.legacyPackages.x86_64-linux.nixpkgs-fmt;
     nixosConfigurations = {
-      # Generic configuration
-      generic = nixpkgs.lib.nixosSystem {
-        system = "x86_64-linux";
-        modules = [
-          disko.nixosModules.disko
-          home-manager.nixosModules.home-manager
-          ./configuration.nix
-          ./hardware-configuration.nix
-          ./nix-channel-setup.nix
-        ];
-      };
-
       # Hetzner AX52 specific configuration
       ax52 = nixpkgs.lib.nixosSystem {
         system = "x86_64-linux";
@@ -27,9 +15,9 @@
           disko.nixosModules.disko
           home-manager.nixosModules.home-manager
           ./configuration.nix
-          ./disks/disk-config-ax52.nix
-          ./nix-channel-setup.nix
-          ./ax52-setup.nix
+          ./modules/nix-channel-setup.nix
+          ./ax52/disk-config-ax52.nix
+          ./ax52/setup.nix
         ];
       };
     };
