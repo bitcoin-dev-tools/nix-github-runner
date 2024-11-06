@@ -11,14 +11,22 @@ This example will use a Hetzner AX52 as target, which comes with 2 SSDs located 
 
 ```bash
 $ nix-shell -p nixos-anywhere
-[nix-shell:~]$ RUNNER_TOKEN=<github runner token> nixos-anywhere --flake .#ax52 root@<ip_address>
+[nix-shell:~]$ nixos-anywhere --flake .#ax52 root@<ip_address>
 ```
 
 Or using `just`:
 
 ```bash
-just deploy ax52 <host> <token>
+just deploy ax52 <host>
 ```
+
+> [!NOTE]
+> This does not deploy a github runner token.
+> Re-run update after first deployment with a token to deploy it.
+
+> [!WARNING]
+> This token is stored in the nix store on the remote host.
+> This is simpler than using SOPS or other mechanisms, but allows any user on the remote host to view it.
 
 ## Update
 
