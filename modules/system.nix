@@ -32,6 +32,10 @@ in
 
   };
 
+  systemd.tmpfiles.rules = [
+    "d /data/runner_workspace 0755 github-runner github-runner -"
+  ];
+
   # Github Actions Runner config
   virtualisation.docker.enable = true;
   users.users.github-runner = {
@@ -42,6 +46,8 @@ in
   services.github-runners.ax52.user = "github-runner";
   services.github-runners.ax52.url = "https://github.com/bitcoin-dev-tools";
   services.github-runners.ax52.tokenFile = "/etc/gh_token";
+  services.github-runners.ax52.ephemeral = true; # This requires that the token be a PAT with org:self-hosted-runner permsissions
+  services.github-runners.ax52.workDir = "/data/runner_workspace";
   services.github-runners.ax52.extraPackages = with pkgs; [ config.virtualisation.docker.package ];
   # End Github Actions Runner config
 
