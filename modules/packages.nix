@@ -40,15 +40,16 @@ in
     ripgrep
     tmux
     # System tools
-    ccache
-    jq
     magic-wormhole
     time
     # Benchmarking
-    hyperfine
-    hyper-wrapper
-    perf-tools
+    ccache
     flamegraph
+    hyper-wrapper
+    hyperfine
+    jq
     linuxKernel.packages.linux_6_6.perf
+    perf-tools
+    python312Packages.pyperf
   ];
 }
