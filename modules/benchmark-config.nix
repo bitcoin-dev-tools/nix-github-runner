@@ -3,87 +3,90 @@
 let
   benchmarkScript = pkgs.writeScriptBin "benchmark-tune" ''
     #!${pkgs.bash}/bin/bash
+    set -euo pipefail
 
     # Ensure MSR module is loaded
     ${pkgs.kmod}/bin/modprobe msr || true
 
-    # Force ASLR off
-    echo 0 > /proc/sys/kernel/randomize_va_space
+    # Verify sysctl settings
+    expected_rate=100000
+    actual_rate=$(${pkgs.procps}/bin/sysctl -n kernel.perf_event_max_sample_rate)
 
-    # Set CPU governor to performance for all CPUs
-    for cpu in /sys/devices/system/cpu/cpu[0-9]*; do
-      echo performance > $cpu/cpufreq/scaling_governor 2>/dev/null || true
-    done
+    if [ "$actual_rate" != "$expected_rate" ]; then
+      echo "Setting perf_event_max_sample_rate to $expected_rate"
+      ${pkgs.procps}/bin/sysctl -w kernel.perf_event_max_sample_rate=$expected_rate
+    fi
 
-    # Set IRQ affinity to spread across all CPUs (this should be default, but just in case)
-    true
-
-    # Run pyperf tune, don't die if we fail though
+    # Run pyperf tune
     ${pkgs.python310Packages.pyperf}/bin/pyperf system tune || true
-
-    # Double-check ASLR is still off
-    echo 0 > /proc/sys/kernel/randomize_va_space
 
     exit 0
   '';
 in
 {
-  boot.kernelModules = [ "msr" "cpuid" ];
+  boot.kernelModules = [ "msr" "cpuid" "x86_pkg_temp_thermal" ];
 
-  # Kernel parameters ~ optimized for AMD Ryzen 7 7700
   boot.kernelParams = [
-    # Performance settings
     "processor.max_cstate=1"
-    "amd_pstate=performance"
     "idle=poll"
-    # Ensure NUMA balancing is disabled
-    "numa_balancing=disable"
-    # Reduce timer frequency
     "tsc=reliable"
+    # "isolcpus=1-15"
+    # "rcu_nocbs=1-15"
   ];
 
-  # More aggressive CPU settings
+  boot.kernelPackages = pkgs.linuxPackages_latest.extend (self: super: {
+    kernel = super.kernel.override {
+      debug = true;
+    };
+  });
+
   powerManagement = {
     enable = true;
-    # This is the same as pyperf, probably one is redundant...
     cpuFreqGovernor = "performance";
     powertop.enable = false;
   };
 
   boot.kernel.sysctl = {
-    # Force ASLR off
-    "kernel.randomize_va_space" = 0;
-    # Disable watchdogs
+    "kernel.kptr_restrict" = lib.mkForce 0;
     "kernel.nmi_watchdog" = 0;
-    # Performance settings
     "kernel.numa_balancing" = 0;
-    "kernel.sched_rt_runtime_us" = -1;
+    "kernel.perf_cpu_time_max_percent" = 75;
+    "kernel.perf_event_max_sample_rate" = 100000;
+    "kernel.perf_event_paranoid" = -1;
+    "kernel.randomize_va_space" = 0;
     "kernel.sched_autogroup_enabled" = 0;
-    "kernel.sched_min_granularity_ns" = 10000000;
     "kernel.sched_migration_cost_ns" = 5000000;
+    "kernel.sched_min_granularity_ns" = 10000000;
     "kernel.sched_nr_migrate" = 0;
+    "kernel.sched_rt_runtime_us" = -1;
   };
 
-  # Systemd configuration
+  services.udev.extraRules = ''
+    KERNEL=="msr[0-9]*", GROUP="root", MODE="0644"
+  '';
+
   systemd = {
     services.systemd-journald.environment.RUNTIME_DIRECTORY_SIZE = "64M";
 
-    # Updated benchmark tuning service
     services.benchmark-tune = {
       description = "Configure system for benchmarking";
       wantedBy = [ "multi-user.target" ];
-      after = [ "network.target" ];
+      after = [ "systemd-sysctl.service" ];
+      requires = [ "systemd-sysctl.service" ];
 
       serviceConfig = {
         Type = "oneshot";
         RemainAfterExit = true;
         ExecStart = "${benchmarkScript}/bin/benchmark-tune";
         Restart = "no";
+        CapabilityBoundingSet = [ "CAP_SYS_ADMIN" "CAP_SYS_NICE" ];
+        AmbientCapabilities = [ "CAP_SYS_ADMIN" "CAP_SYS_NICE" ];
+        PrivilegeEscalationAllowed = true;
+        NoNewPrivileges = false;
       };
     };
   };
 
-  # Disable services that might interfere
   services = {
     timesyncd.enable = false;
     acpid.enable = false;
@@ -92,18 +95,8 @@ in
 
     journald.extraConfig = ''
       Storage=volatile
-      SystemMaxUse=64M
-      RuntimeMaxUse=64M
       ForwardToSyslog=no
       ForwardToKMsg=no
     '';
   };
-
-  # Ensure these settings persist
-  environment.etc."sysctl.d/99-benchmark.conf".text = ''
-    kernel.randomize_va_space = 0
-    kernel.numa_balancing = 0
-    kernel.sched_rt_runtime_us = -1
-    kernel.nmi_watchdog = 0
-  '';
 }
