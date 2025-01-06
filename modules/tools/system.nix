@@ -4,6 +4,7 @@
     curl
     eza
     fd
+    htop
     just
     mosh
     neovim

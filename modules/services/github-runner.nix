@@ -7,8 +7,9 @@ in {
   users.users.github-runner = {
     isNormalUser = true;
     group = "github-runner";
-    extraGroups = [ "docker" ];
+    extraGroups = [ "docker" "perf" ];
   };
+  users.groups.perf = { };
 
   systemd.tmpfiles.rules = [
     "d /data/runner_workspace 0755 github-runner github-runner -"
@@ -28,6 +29,8 @@ in {
     serviceOverrides = {
       ProtectHome = false;
       ReadWritePaths = [ "/data/ccache" "/data/runner_workspace" ];
+      AmbientCapabilities = [ "CAP_SYS_RAWIO" ];
+      CapabilityBoundingSet = [ "CAP_SYS_RAWIO" ];
     };
   };
 }
