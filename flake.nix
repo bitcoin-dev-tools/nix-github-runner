@@ -6,7 +6,8 @@
   inputs.home-manager.inputs.nixpkgs.follows = "nixpkgs";
 
   outputs = { nixpkgs, disko, home-manager, ... }: {
-    formatter.x86_64-linux = nixpkgs.legacyPackages.x86_64-linux.nixpkgs-fmt;
+    formatter.x86_64-linux =
+      nixpkgs.legacyPackages.x86_64-linux.nixfmt-rfc-style;
     nixosConfigurations = {
       # Hetzner AX52 specific configuration
       ax52 = nixpkgs.lib.nixosSystem {

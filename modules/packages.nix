@@ -1,21 +1,4 @@
-{ config, lib, pkgs, ... }:
-let
-  hyper-wrapper = pkgs.rustPlatform.buildRustPackage rec {
-    pname = "hyper-wrapper";
-    version = "0.1.1";
-    src = pkgs.fetchCrate {
-      inherit pname version;
-      sha256 = "sha256-EjDIvCmW0q7ddjAR8hY0v/HFkWZil88gQuJrLbSssck=";
-    };
-    cargoHash = "sha256-TCaDh5yay1u+nS2iWnp0kGF/dTvxVteIFKxU8Ae1DrI=";
-    meta = with pkgs.lib; {
-      description = "Hyperfine wrapper";
-      homepage = "https://github.com/bitcoin-dev-tools/hyper-wrapper";
-      license = licenses.mit;
-    };
-  };
-in
-{
+{ config, pkgs, ... }: {
   environment.enableDebugInfo = true;
   environment.systemPackages = with pkgs; [
     # Development tools
@@ -44,12 +27,11 @@ in
     time
     # Benchmarking
     ccache
+    config.boot.kernelPackages.perf
     flamegraph
-    hyper-wrapper
+    glibc.debug
     hyperfine
     jq
-    linuxKernel.packages.linux_6_6.perf
     perf-tools
-    python312Packages.pyperf
   ];
 }

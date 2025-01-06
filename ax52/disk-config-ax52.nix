@@ -1,5 +1,4 @@
-{ lib, ... }:
-{
+{ lib, ... }: {
   disko.devices = {
     disk.disk1 = {
       device = lib.mkDefault "/dev/nvme1n1";
@@ -46,9 +45,7 @@
               type = "filesystem";
               format = "ext4";
               mountpoint = "/data";
-              mountOptions = [
-                "defaults"
-              ];
+              mountOptions = [ "defaults" ];
             };
           };
         };
@@ -64,9 +61,7 @@
               type = "filesystem";
               format = "ext4";
               mountpoint = "/";
-              mountOptions = [
-                "defaults"
-              ];
+              mountOptions = [ "defaults" ];
             };
           };
         };

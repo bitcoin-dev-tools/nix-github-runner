@@ -3,12 +3,9 @@ let
   ssh_keys = [
     "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIH988C5DbEPHfoCphoW23MWq9M6fmA4UTXREiZU0J7n0 will.hetzner@temp.com"
   ];
-in
-{
+in {
   users = {
-    users.root = {
-      openssh.authorizedKeys.keys = ssh_keys;
-    };
+    users.root = { openssh.authorizedKeys.keys = ssh_keys; };
 
     users.satoshi = {
       isNormalUser = true;
@@ -19,12 +16,7 @@ in
   };
 
   home-manager.users.satoshi = with pkgs; {
-    home.packages = [
-      direnv
-      fzf
-      starship
-      zoxide
-    ];
+    home.packages = [ direnv fzf starship zoxide ];
     home.preferXdgDirectories = true;
 
     # Aliases which apply across all shells
@@ -44,8 +36,7 @@ in
     '';
 
     programs.bash.enable = true;
-    programs.bash.bashrcExtra = ''
-    '';
+    programs.bash.bashrcExtra = "";
 
     programs.direnv = {
       enable = true;
