@@ -50,19 +50,31 @@ just deploy ax52 <host>
 
 - Stage or commit changes
 
+### (Optional) Perform a dry-run
+
+You can perform a dry-run with:
+
+```bash
+just dry-run ax52
+```
+
+### Live update
+
 ```bash
 $ nix-shell -p nixos-rebuild
-[nix-shell:~]$ RUNNER_TOKEN=<github runner token> nixos-rebuild switch --flake .#ax52 --target-host root@<ip_address>
+[nix-shell:~]$ GH_TOKEN=<github runner token> nixos-rebuild switch --flake .#ax52 --target-host root@<ip_address>
 ```
 
 Or using `just`:
 
 ```bash
-just rebuild ax52 <host> <token>
+export GH_TOKEN=<github token>
+
+just rebuild ax52 <host>
 ```
 
 > [!WARNING]
-> This token is stored in the nix store on the remote host.
+> This token **is** stored in the nix store on the remote host.
 > This is simpler than using SOPS or other mechanisms, but allows any user on the remote host to view it.
 
 ## Adding a new runner type
@@ -74,7 +86,7 @@ Adding a new generic runner can be made more straightforward in the future (see 
 Most of this configuration is generic-enough to be used on a wide range of hardware, however as it currently stands disks should be manually configured.
 This is typically done by `ssh`-ing into the server and running e.g. `lsblk` to see mounted block devices.
 
-The disk configuration can then be transcribed into new file following the format similar to that found in [ax52/disk-config-ax52.nix](ax52/disk-config-ax52.nix) as appropriate.
+The disk configuration can then be transcribed into new file following the format similar to that found in [hosts/ax52/disk-config.nix](hosts/ax52/disk-config.nix) as appropriate.
 
 In the future, if we want to support generic runners more easily, see [Section 8](https://github.com/nix-community/nixos-anywhere/blob/main/docs/quickstart.md#8-prepare-hardware-configuration) of the `nixos-anywhere` documentation for usage of `--generate-hardware-config nixos-generate-config ./hardware-configuration.nix` or `nixos-facter`.
 These can both be used to automatically fetch disk information and generate a generic hardware configuration for the host.
