@@ -1,13 +1,12 @@
 { pkgs, ... }: {
   boot = {
+    loader.grub = {
+      efiSupport = true;
+      efiInstallAsRemovable = true;
+    };
+
     kernelModules = [ "msr" "cpuid" "x86_pkg_temp_thermal" ];
-
-    kernelParams = [
-      "processor.max_cstate=1"
-      "idle=poll"
-      "tsc=reliable"
-    ];
-
+    kernelParams = [ "processor.max_cstate=1" "idle=poll" "tsc=reliable" ];
     kernelPackages = pkgs.linuxPackages_6_6;
 
     kernel.sysctl = {

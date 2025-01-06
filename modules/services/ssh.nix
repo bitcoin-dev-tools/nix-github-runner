@@ -1,12 +1,4 @@
-{ config, lib, pkgs, ... }: {
-  # Firewall
-  networking.firewall = {
-    enable = true;
-    allowedTCPPorts = [ 22 ];
-    allowPing = true;
-  };
-
-  # SSH hardening
+{ ... }: {
   services.openssh = {
     enable = true;
     settings = {
@@ -17,15 +9,20 @@
     };
   };
 
-  # System security
-  security.sudo = {
-    enable = true;
-    wheelNeedsPassword = false;
-  };
-
   services.fail2ban = {
     enable = true;
     maxretry = 5;
     bantime = "24h";
+  };
+
+  networking.firewall = {
+    enable = true;
+    allowedTCPPorts = [ 22 ];
+    allowPing = true;
+  };
+
+  security.sudo = {
+    enable = true;
+    wheelNeedsPassword = false;
   };
 }

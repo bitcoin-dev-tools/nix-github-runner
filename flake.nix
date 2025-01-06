@@ -6,19 +6,14 @@
   inputs.home-manager.inputs.nixpkgs.follows = "nixpkgs";
 
   outputs = { nixpkgs, disko, home-manager, ... }: {
-    formatter.x86_64-linux =
-      nixpkgs.legacyPackages.x86_64-linux.nixfmt-rfc-style;
+    formatter.x86_64-linux = nixpkgs.legacyPackages.x86_64-linux.nixfmt-rfc-style;
     nixosConfigurations = {
-      # Hetzner AX52 specific configuration
       ax52 = nixpkgs.lib.nixosSystem {
         system = "x86_64-linux";
         modules = [
           disko.nixosModules.disko
           home-manager.nixosModules.home-manager
-          ./configuration.nix
-          ./modules/nix-channel-setup.nix
-          ./ax52/disk-config-ax52.nix
-          ./ax52/setup.nix
+          ./hosts/ax52/configuration.nix
         ];
       };
     };

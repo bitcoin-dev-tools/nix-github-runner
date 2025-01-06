@@ -1,6 +1,15 @@
-{ config, lib, pkgs, ... }:
+{ pkgs, ... }: {
+  nix = {
+    settings = {
+      experimental-features = [
+        "nix-command"
+        "flakes"
+        "auto-allocate-uids"
+        "configurable-impure-env"
+      ];
+    };
+  };
 
-{
   systemd.services.setup-nix-channels = {
     description = "Setup Nix channels";
     wantedBy = [ "multi-user.target" ];
@@ -18,7 +27,6 @@
     };
 
     script = ''
-      # Only run if channels aren't set up
       if [ ! -e "/nix/var/nix/profiles/per-user/root/channels" ]; then
         ${pkgs.nix}/bin/nix-channel --add https://nixos.org/channels/nixos-unstable nixos
         ${pkgs.nix}/bin/nix-channel --update
