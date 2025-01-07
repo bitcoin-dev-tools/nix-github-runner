@@ -25,6 +25,7 @@ in {
     tokenFile = "/etc/gh_token";
     ephemeral = true;
     workDir = "/data/runner_workspace";
+    replace = true;
     extraPackages = with pkgs; [ config.virtualisation.docker.package ccache ];
     serviceOverrides = {
       ProtectHome = false;
