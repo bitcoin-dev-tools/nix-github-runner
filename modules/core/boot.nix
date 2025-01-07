@@ -1,4 +1,4 @@
-{ pkgs, ... }: {
+{ config, pkgs, ... }: {
   boot = {
     loader.grub = {
       efiSupport = true;
@@ -25,6 +25,12 @@
       "kernel.sched_rt_runtime_us" = -1;
     };
   };
+
+  # Create kernel modules directory structure
+  system.activationScripts.kernelModules = ''
+    mkdir -p /lib/modules/${config.boot.kernelPackages.kernel.version}
+    ln -sfn ${config.boot.kernelPackages.kernel.dev}/lib/modules/${config.boot.kernelPackages.kernel.version}/* /lib/modules/${config.boot.kernelPackages.kernel.version}/
+  '';
 
   powerManagement = {
     enable = true;
