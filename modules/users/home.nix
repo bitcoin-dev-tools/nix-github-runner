@@ -1,5 +1,6 @@
 { pkgs, ... }: {
-  home-manager.users.satoshi = with pkgs; {
+  home-manager.users = {
+    satoshi = with pkgs; {
     home.packages = [ direnv fzf starship zoxide ];
     home.preferXdgDirectories = true;
 
@@ -19,7 +20,8 @@
 
     programs = {
       bash.enable = true;
-      bash.bashrcExtra = "";
+      bash.bashrcExtra = ''
+      '';
 
       direnv = {
         enable = true;
@@ -55,5 +57,21 @@
     };
 
     home.stateVersion = "24.05";
+  };
+
+    github-runner = {
+      programs.bash = {
+        enable = true;
+        bashrcExtra = ''
+          GUIX_PROFILE=/home/github-runner/.config/guix/current
+          . "$GUIX_PROFILE/etc/profile"
+        '';
+        profileExtra = ''
+          GUIX_PROFILE=/home/github-runner/.config/guix/current
+          . "$GUIX_PROFILE/etc/profile"
+        '';
+      };
+      home.stateVersion = "24.05";
+    };
   };
 }

@@ -1,31 +1,26 @@
-{ config, pkgs, lib, ... }:
-let
-  runner_token = builtins.getEnv "RUNNER_TOKEN";
+{ config, pkgs, ... }:
+let runner_token = builtins.getEnv "RUNNER_TOKEN";
 in {
+  imports = [ ./github-runner-definition/module.nix ];
   virtualisation.docker.enable = true;
 
-  users.groups = {
-    github-runner = {};
-    perf = {};
-  };
+  users.groups.perf = { };
 
   users.users.github-runner = {
     isNormalUser = true;
-    group = "github-runner";
-    extraGroups = [ "docker" "perf" ];
+    extraGroups = [ "docker" "perf" "wheel" ];
+    home = "/home/github-runner";
+    shell = pkgs.bash;
   };
 
   systemd.tmpfiles.rules = [
-    "d /data/runner_workspace 0755 github-runner github-runner -"
-    "d /data/ccache 0755 github-runner github-runner -"
+    "d /data/runner_workspace 0755 github-runner users -"
+    "d /data/ccache 0755 github-runner users -"
+    "d /data/SOURCES_PATH 0755 github-runner users -"
+    "d /data/BASE_CACHE 0755 github-runner users -"
   ];
 
   environment.etc.gh_token.text = runner_token;
-
-  systemd.services.github-runner-ax52 = {
-    startLimitIntervalSec = 300;
-    startLimitBurst = 3;
-  };
 
   services.github-runners.ax52 = {
     enable = true;
@@ -38,21 +33,29 @@ in {
     extraPackages = with pkgs; [
       config.virtualisation.docker.package
       ccache
+      guix
     ];
     serviceOverrides = {
-      ProtectHome = false;
       ReadWritePaths = [
+        "/home/github-runner"
         "/data/ccache"
         "/data/runner_workspace"
+        "/data/SOURCES_PATH"
+        "/data/BASE_CACHE"
+        "/gnu"
+        "/var/guix"
+        "/tmp"
+        "/proc"
+        "/sys"
       ];
-      AmbientCapabilities = [ "CAP_SYS_RAWIO" ];
-      CapabilityBoundingSet = [ "CAP_SYS_RAWIO" ];
-      # Rate limit unsucessful restarts
+
+      Environment =
+        [ "SOURCES_PATH=/data/SOURCES_PATH" "BASE_CACHE=/data/BASE_CACHE" ];
+
+      # Override restart defaults
+      RestartForceExitStatus = [ 0 1 2 ];
       StartLimitBurst = 3;
       StartLimitIntervalSec = 300;
-      # Restart on any exit code
-      RestartForceExitStatus = [ 0 1 2 ];
-      # Override the default succeed-exit-codes to ensure restarts happen
       SuccessExitStatus = [ 0 1 2 ];
     };
   };
