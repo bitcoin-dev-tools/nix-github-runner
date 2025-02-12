@@ -57,6 +57,10 @@ in {
       StartLimitBurst = 3;
       StartLimitIntervalSec = 300;
       SuccessExitStatus = [ 0 1 2 ];
+
+      # Add capability for managing process priorities using chrt
+      AmbientCapabilities = [ "CAP_SYS_NICE" ];
+      CapabilityBoundingSet = [ "CAP_SYS_NICE" ];
     };
   };
 }
