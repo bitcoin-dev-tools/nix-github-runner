@@ -59,8 +59,8 @@ in {
       SuccessExitStatus = [ 0 1 2 ];
 
       # Add capability for managing process priorities using chrt
-      AmbientCapabilities = [ "CAP_SYS_NICE" ];
-      CapabilityBoundingSet = [ "CAP_SYS_NICE" ];
+      AmbientCapabilities = [ "CAP_SYS_NICE" "CAP_DAC_OVERRIDE" ];
+      CapabilityBoundingSet = [ "CAP_SYS_NICE" "CAP_DAC_OVERRIDE" ];
     };
   };
 }
