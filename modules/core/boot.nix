@@ -19,6 +19,7 @@
       "isolcpus=2-15" # Isolate CPUs 2-15 from the general scheduler
       "nohz_full=2-15" # Enable full dynticks system for isolated CPUs
       "rcu_nocbs=2-15" # Don't run RCU callbacks on isolated CPUs
+      "amd_pstate=active" # Enable AMD P-State driver
     ];
     kernelPackages = pkgs.linuxPackages_6_6;
 
@@ -28,9 +29,9 @@
       "kernel.nmi_watchdog" = 0;
       "kernel.numa_balancing" = 0;
       "kernel.perf_cpu_time_max_percent" = 75;
-      "kernel.perf_event_max_sample_rate" = 100000;
+      "kernel.perf_event_max_sample_rate" = 200;
       "kernel.perf_event_paranoid" = -1;
-      "kernel.randomize_va_space" = 2; # Enable full randomization
+      "kernel.randomize_va_space" = 2;
       "kernel.sched_autogroup_enabled" = 0;
       "kernel.sched_migration_cost_ns" = 5000000;
       "kernel.sched_min_granularity_ns" = 10000000;
@@ -43,6 +44,16 @@
   system.activationScripts.kernelModules = ''
     mkdir -p /lib/modules/${config.boot.kernelPackages.kernel.version}
     ln -sfn ${config.boot.kernelPackages.kernel.dev}/lib/modules/${config.boot.kernelPackages.kernel.version}/* /lib/modules/${config.boot.kernelPackages.kernel.version}/
+  '';
+  # Limit CPU frequency to 4.2GHz
+  system.activationScripts.fixCpuFreq = ''
+    for cpu in /sys/devices/system/cpu/cpu[0-9]*; do
+      if [ -d "$cpu/cpufreq" ]; then
+        echo "Setting frequency limits for $(basename "$cpu")"
+        echo 4200000 > "$cpu/cpufreq/scaling_max_freq"
+        echo 4200000 > "$cpu/cpufreq/scaling_min_freq"
+      fi
+    done
   '';
 
   powerManagement = {
