@@ -22,35 +22,6 @@ in {
 
   environment.etc.gh_token.text = runner_token;
 
-  # Set up system for benchmark
-  environment.etc."setup-bench.sh" = {
-    text = ''
-      #!/bin/sh
-      echo "Syncing filesystem..."
-      sync
-
-      echo "Dropping caches..."
-      echo 3 | sudo tee /proc/sys/vm/drop_caches > /dev/null
-
-      echo "Clearing swap..."
-      sudo swapoff -a
-      sudo swapon -a
-
-      echo "Waiting for system to stabilize..."
-      sleep 5
-    '';
-    mode = "0755";
-  };
-
-  # Grant sudo access to the cleanup script for github-runner
-  security.sudo.extraRules = [{
-    users = [ "github-runner" ];
-    commands = [{
-      command = "/etc/setup-bench.sh";
-      options = [ "NOPASSWD" ];
-    }];
-  }];
-
   services.github-runners.ax52 = {
     enable = true;
     user = "github-runner";
