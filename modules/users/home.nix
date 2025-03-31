@@ -56,7 +56,7 @@
       home-manager.enable = true;
     };
 
-    home.stateVersion = "24.05";
+    home.stateVersion = "24.11";
   };
 
     github-runner = {
@@ -71,7 +71,7 @@
           . "$GUIX_PROFILE/etc/profile"
         '';
       };
-      home.stateVersion = "24.05";
+      home.stateVersion = "24.11";
     };
   };
 }
