@@ -30,6 +30,8 @@ in {
     ephemeral = true;
     workDir = "/data/runner_workspace";
     replace = true;
+    # Use github-runner from unstable otherwise it GH deprecates it too fast :(
+    package = pkgs.github-runner-unstable;
     extraPackages = with pkgs; [
       config.virtualisation.docker.package
       ccache

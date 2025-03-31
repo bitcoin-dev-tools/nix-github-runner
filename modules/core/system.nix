@@ -14,5 +14,5 @@
     };
   };
 
-  system.stateVersion = "unstable";
+  system.stateVersion = "24.11";
 }
