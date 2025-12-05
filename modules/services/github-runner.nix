@@ -4,6 +4,17 @@ in {
   imports = [ ./github-runner-definition/module.nix ];
   virtualisation.docker.enable = true;
 
+  # Setuid wrapper to allow dropping page cache without full sudo access
+  security.wrappers.drop-caches = {
+    source = "${pkgs.writeShellScript "drop-caches" ''
+      sync
+      echo 3 > /proc/sys/vm/drop_caches
+    ''}";
+    owner = "root";
+    group = "root";
+    setuid = true;
+  };
+
   users.groups.perf = { };
 
   users.users.github-runner = {
