@@ -1,4 +1,5 @@
-{ ... }: {
+{ ... }:
+{
   imports = [
     # ./guix-test.nix
     ./github-runner.nix

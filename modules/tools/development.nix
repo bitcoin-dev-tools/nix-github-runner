@@ -1,4 +1,5 @@
-{ pkgs, ... }: {
+{ pkgs, ... }:
+{
   environment.enableDebugInfo = true;
   environment.systemPackages = with pkgs; [
     bash

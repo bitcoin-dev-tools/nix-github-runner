@@ -1,3 +1,7 @@
-{ ... }: {
-  imports = [ ./github-runner-options.nix ./github-runner-service.nix ];
+{ ... }:
+{
+  imports = [
+    ./github-runner-options.nix
+    ./github-runner-service.nix
+  ];
 }

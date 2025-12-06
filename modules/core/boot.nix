@@ -1,11 +1,16 @@
-{ ... }: {
+{ ... }:
+{
   boot = {
     loader.grub = {
       efiSupport = true;
       efiInstallAsRemovable = true;
     };
 
-    kernelModules = [ "msr" "cpuid" "x86_pkg_temp_thermal" ];
+    kernelModules = [
+      "msr"
+      "cpuid"
+      "x86_pkg_temp_thermal"
+    ];
     kernel.sysctl = {
       "dev.perf_event_mlock_kb" = 516096;
       "kernel.kptr_restrict" = 0;

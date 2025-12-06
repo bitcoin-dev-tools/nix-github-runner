@@ -1,1 +1,8 @@
-{ ... }: { imports = [ ./benchmark.nix ./development.nix ./system.nix ]; }
+{ ... }:
+{
+  imports = [
+    ./benchmark.nix
+    ./development.nix
+    ./system.nix
+  ];
+}

@@ -1,4 +1,5 @@
-{ config, pkgs, ... }: {
+{ config, pkgs, ... }:
+{
   imports = [
     ./hardware.nix
     ./disk-config.nix
@@ -31,13 +32,13 @@
     setDataPermissions = ''
       chown satoshi:users /data
     '';
-    
+
     # Create kernel modules directory structure
     kernelModules = ''
       mkdir -p /lib/modules/${config.boot.kernelPackages.kernel.version}
       ln -sfn ${config.boot.kernelPackages.kernel.dev}/lib/modules/${config.boot.kernelPackages.kernel.version}/* /lib/modules/${config.boot.kernelPackages.kernel.version}/
     '';
-    
+
     # Limit CPU frequency to 4.2GHz
     fixCpuFreq = ''
       for cpu in /sys/devices/system/cpu/cpu[0-9]*; do

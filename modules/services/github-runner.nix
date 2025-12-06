@@ -1,15 +1,38 @@
 { config, pkgs, ... }:
-let runner_token = builtins.getEnv "RUNNER_TOKEN";
-in {
+let
+  runner_token = builtins.getEnv "RUNNER_TOKEN";
+in
+{
   imports = [ ./github-runner-definition/module.nix ];
   virtualisation.docker.enable = true;
 
-  # Setuid wrapper to allow dropping page cache without full sudo access
+  # Wrapper to allow dropping page cache without full sudo access
+  # Must be a compiled bin as Linux ignores setuid on interpreted scripts
   security.wrappers.drop-caches = {
-    source = "${pkgs.writeShellScript "drop-caches" ''
-      sync
-      echo 3 > /proc/sys/vm/drop_caches
-    ''}";
+    source = "${
+      pkgs.stdenv.mkDerivation {
+        name = "drop-caches";
+        dontUnpack = true;
+        buildPhase = ''
+          $CC -x c -o drop-caches - <<'EOF'
+          #include <stdio.h>
+          #include <unistd.h>
+          int main(void) {
+            sync();
+            FILE *f = fopen("/proc/sys/vm/drop_caches", "w");
+            if (!f) { perror("drop_caches"); return 1; }
+            fprintf(f, "3\n");
+            fclose(f);
+            return 0;
+          }
+          EOF
+        '';
+        installPhase = ''
+          mkdir -p $out/bin
+          cp drop-caches $out/bin/
+        '';
+      }
+    }/bin/drop-caches";
     owner = "root";
     group = "root";
     setuid = true;
@@ -19,7 +42,11 @@ in {
 
   users.users.github-runner = {
     isNormalUser = true;
-    extraGroups = [ "docker" "perf" "wheel" ];
+    extraGroups = [
+      "docker"
+      "perf"
+      "wheel"
+    ];
     home = "/home/github-runner";
     shell = pkgs.bash;
   };
@@ -62,18 +89,34 @@ in {
         "/sys"
       ];
 
-      Environment =
-        [ "SOURCES_PATH=/data/SOURCES_PATH" "BASE_CACHE=/data/BASE_CACHE" ];
+      Environment = [
+        "SOURCES_PATH=/data/SOURCES_PATH"
+        "BASE_CACHE=/data/BASE_CACHE"
+      ];
 
       # Override restart defaults
-      RestartForceExitStatus = [ 0 1 2 ];
+      RestartForceExitStatus = [
+        0
+        1
+        2
+      ];
       StartLimitBurst = 3;
       StartLimitIntervalSec = 300;
-      SuccessExitStatus = [ 0 1 2 ];
+      SuccessExitStatus = [
+        0
+        1
+        2
+      ];
 
       # Add capability for managing process priorities using chrt
-      AmbientCapabilities = [ "CAP_SYS_NICE" "CAP_DAC_OVERRIDE" ];
-      CapabilityBoundingSet = [ "CAP_SYS_NICE" "CAP_DAC_OVERRIDE" ];
+      AmbientCapabilities = [
+        "CAP_SYS_NICE"
+        "CAP_DAC_OVERRIDE"
+      ];
+      CapabilityBoundingSet = [
+        "CAP_SYS_NICE"
+        "CAP_DAC_OVERRIDE"
+      ];
     };
   };
 }

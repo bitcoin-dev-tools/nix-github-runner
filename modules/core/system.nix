@@ -1,4 +1,5 @@
-{ ... }: {
+{ ... }:
+{
   time.timeZone = "UTC";
 
   services.journald.extraConfig = ''
