@@ -11,17 +11,6 @@
     };
   };
 
-  # Force nix-daemon to use ONLY isolated CPUs (2-15)
-  # With isolcpus=2-15, including non-isolated cores (0-1) causes scheduler to prefer only those
-  # By restricting to 2-15 only, scheduler is forced to use the isolated cores
-  systemd.services.nix-daemon.serviceConfig = {
-    AllowedCPUs = "2-15";
-    ExecStart = [
-      ""  # Clear the default ExecStart
-      "${pkgs.util-linux}/bin/taskset -c 2-15 ${pkgs.nix}/bin/nix-daemon"
-    ];
-  };
-
   systemd.services.setup-nix-channels = {
     description = "Setup Nix channels";
     wantedBy = [ "multi-user.target" ];
