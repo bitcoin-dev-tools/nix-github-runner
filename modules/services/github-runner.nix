@@ -6,6 +6,9 @@ in
   imports = [ ./github-runner-definition/module.nix ];
   virtualisation.docker.enable = true;
 
+  # Allow nix sandbox to access ccache
+  nix.settings.extra-sandbox-paths = [ "/nix/var/cache/ccache" ];
+
   # Wrapper to allow dropping page cache without full sudo access
   # Must be a compiled bin as Linux ignores setuid on interpreted scripts
   security.wrappers.drop-caches = {
@@ -53,7 +56,7 @@ in
 
   systemd.tmpfiles.rules = [
     "d /data/runner_workspace 0755 github-runner users -"
-    "d /data/ccache 0755 github-runner users -"
+    "d /nix/var/cache/ccache 0770 github-runner nixbld -"
     "d /data/SOURCES_PATH 0755 github-runner users -"
     "d /data/BASE_CACHE 0755 github-runner users -"
   ];
@@ -78,7 +81,7 @@ in
     serviceOverrides = {
       ReadWritePaths = [
         "/home/github-runner"
-        "/data/ccache"
+        "/nix/var/cache/ccache"
         "/data/runner_workspace"
         "/data/SOURCES_PATH"
         "/data/BASE_CACHE"
