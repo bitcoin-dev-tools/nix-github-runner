@@ -11,14 +11,14 @@
     };
   };
 
-  # Allow nix-daemon to use all CPUs including isolated ones (isolcpus=2-15)
-  # AllowedCPUs sets cgroup permission, but isolcpus requires explicit affinity
-  # ExecStart with taskset sets affinity for daemon AND all forked children
+  # Force nix-daemon to use ONLY isolated CPUs (2-15)
+  # With isolcpus=2-15, including non-isolated cores (0-1) causes scheduler to prefer only those
+  # By restricting to 2-15 only, scheduler is forced to use the isolated cores
   systemd.services.nix-daemon.serviceConfig = {
-    AllowedCPUs = "0-15";
+    AllowedCPUs = "2-15";
     ExecStart = [
       ""  # Clear the default ExecStart
-      "${pkgs.util-linux}/bin/taskset -c 0-15 ${pkgs.nix}/bin/nix-daemon"
+      "${pkgs.util-linux}/bin/taskset -c 2-15 ${pkgs.nix}/bin/nix-daemon"
     ];
   };
 
