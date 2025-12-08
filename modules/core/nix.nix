@@ -12,8 +12,15 @@
   };
 
   # Allow nix-daemon to use all CPUs including isolated ones (isolcpus=2-15)
-  # This ensures builds can use all cores even though benchmarks are pinned to 2-15
-  systemd.services.nix-daemon.serviceConfig.AllowedCPUs = "0-15";
+  # AllowedCPUs sets cgroup permission, but isolcpus requires explicit affinity
+  # ExecStart with taskset sets affinity for daemon AND all forked children
+  systemd.services.nix-daemon.serviceConfig = {
+    AllowedCPUs = "0-15";
+    ExecStart = [
+      ""  # Clear the default ExecStart
+      "${pkgs.util-linux}/bin/taskset -c 0-15 ${pkgs.nix}/bin/nix-daemon"
+    ];
+  };
 
   systemd.services.setup-nix-channels = {
     description = "Setup Nix channels";

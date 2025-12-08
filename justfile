@@ -3,7 +3,7 @@ set shell := ["bash", "-uc"]
 os := os()
 ax52 := 'ax52'
 github-runner := 'runner-root'
-GH_TOKEN := env('GH_TOKEN', 'GH_TOKEN NOT SET')
+GH_TOKEN := env('RUNNER_TOKEN', 'RUNNER_TOKEN NOT SET')
 
 [private]
 default:
