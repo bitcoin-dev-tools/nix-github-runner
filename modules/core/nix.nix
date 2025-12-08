@@ -11,6 +11,10 @@
     };
   };
 
+  # Allow nix-daemon to use all CPUs including isolated ones (isolcpus=2-15)
+  # This ensures builds can use all cores even though benchmarks are pinned to 2-15
+  systemd.services.nix-daemon.serviceConfig.AllowedCPUs = "0-15";
+
   systemd.services.setup-nix-channels = {
     description = "Setup Nix channels";
     wantedBy = [ "multi-user.target" ];
