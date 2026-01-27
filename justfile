@@ -3,7 +3,6 @@ set shell := ["bash", "-uc"]
 os := os()
 ax52 := 'ax52'
 github-runner := 'runner-root'
-GH_TOKEN := env('RUNNER_TOKEN', 'RUNNER_TOKEN NOT SET')
 
 [private]
 default:
@@ -35,10 +34,8 @@ sync host=github-runner:
     rsync -av --exclude=result* . {{host}}:/etc/nixos-config/
     ssh {{host}} "chown -R root:root /etc/nixos-config"
 
-# Rebuild a github CI runner on a machine with a new token
+# Rebuild a github CI runner on a machine
 [group('live')]
-rebuild type=ax52 host=github-runner gh_token=GH_TOKEN:
-    RUNNER_TOKEN={{gh_token}} nixos-rebuild switch --flake .#{{type}} --target-host {{host}} --impure
-    echo "After sync, to apply config run:"
-    echo "ssh {{host}} "cd /etc/nixos-config && source .env && RUNNER_TOKEN=\$GH_TOKEN nixos-rebuild switch --flake .#{{type}} --impure && rm -f .env"
+rebuild type=ax52 host=github-runner:
+    nixos-rebuild switch --flake .#{{type}} --target-host {{host}}
 

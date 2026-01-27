@@ -1,0 +1,10 @@
+keys:
+  - &will age1yggqyza4vmts7uuuuykz42sd8dwqszgcfd6y6avw8ul5pm2ekffsg2gqr2
+  - &ax52 age1h5djqjne3sukjakxzy3a55ws0kexryt337tdgr5u4ay720rhfvks22cc3c
+
+creation_rules:
+  - path: secrets/default.yaml
+    key_groups:
+      - age:
+          - *will
+          - *ax52

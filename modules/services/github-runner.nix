@@ -1,8 +1,11 @@
 { config, pkgs, ... }:
-let
-  runner_token = builtins.getEnv "RUNNER_TOKEN";
-in
 {
+  sops.secrets.runner_token = {
+    sopsFile = ../../secrets/default.yaml;
+    owner = "github-runner";
+    mode = "0400";
+  };
+
   imports = [ ./github-runner-definition/module.nix ];
   virtualisation.docker.enable = true;
 
@@ -61,13 +64,11 @@ in
     "d /data/BASE_CACHE 0755 github-runner users -"
   ];
 
-  environment.etc.gh_token.text = runner_token;
-
   services.github-runners.ax52 = {
     enable = true;
     user = "github-runner";
     url = "https://github.com/bitcoin-dev-tools";
-    tokenFile = "/etc/gh_token";
+    tokenFile = config.sops.secrets.runner_token.path;
     ephemeral = true;
     workDir = "/data/runner_workspace";
     replace = true;

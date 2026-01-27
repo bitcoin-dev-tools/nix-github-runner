@@ -5,6 +5,8 @@
   inputs.disko.inputs.nixpkgs.follows = "nixpkgs";
   inputs.home-manager.url = "github:nix-community/home-manager/release-25.05";
   inputs.home-manager.inputs.nixpkgs.follows = "nixpkgs";
+  inputs.sops-nix.url = "github:Mic92/sops-nix";
+  inputs.sops-nix.inputs.nixpkgs.follows = "nixpkgs";
 
   outputs =
     {
@@ -12,6 +14,7 @@
       nixpkgs-unstable,
       disko,
       home-manager,
+      sops-nix,
       ...
     }:
     {
@@ -22,6 +25,7 @@
           modules = [
             disko.nixosModules.disko
             home-manager.nixosModules.home-manager
+            sops-nix.nixosModules.sops
             ./hosts/ax52/configuration.nix
             # Make nixpkgs-unstable available to our configuration
             (
