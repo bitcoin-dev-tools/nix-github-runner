@@ -28,14 +28,28 @@ dry-run type=ax52:
 deploy type=ax52 host=github-runner:
     nix-shell -p nixos-anywhere --command "nixos-anywhere --flake .#{{type}} {{host}}"
 
-# Copy flake to remote for local building
+# Copy flake to remote and build remotely
 [group('live')]
-sync host=github-runner:
-    rsync -av --exclude=result* . {{host}}:/etc/nixos-config/
-    ssh {{host}} "chown -R root:root /etc/nixos-config"
+sync type=ax52 host=github-runner:
+    rsync -av --delete --exclude=result* --exclude=.git . {{host}}:/etc/nixos-config/
+    ssh {{host}} "chown -R root:root /etc/nixos-config && cd /etc/nixos-config && nixos-rebuild switch --flake .#{{type}}"
 
 # Rebuild a github CI runner on a machine
 [group('live')]
 rebuild type=ax52 host=github-runner:
     nixos-rebuild switch --flake .#{{type}} --target-host {{host}}
 
+# SSH into the host
+[group('live')]
+ssh host=github-runner:
+    ssh {{host}}
+
+# Get logs from bitcoind seed
+[group('live')]
+logs-seed host=github-runner:
+    ssh {{host}} "tail -F /var/lib/bitcoind-source/debug.log"
+
+# Get logs from github-runner
+[group('live')]
+logs-runner type=ax52 host=github-runner:
+    ssh {{host}} "journalctl -f -u {{host}}-{{type}}.service"
