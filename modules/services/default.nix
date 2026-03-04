@@ -2,6 +2,7 @@
 {
   imports = [
     # ./guix-test.nix
+    ./bitcoind.nix
     ./github-runner.nix
     ./ssh.nix
   ];
