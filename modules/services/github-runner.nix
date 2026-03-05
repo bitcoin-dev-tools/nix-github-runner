@@ -84,6 +84,31 @@
     setuid = true;
   };
 
+  # Lightweight system metrics logger for correlating with benchmark runs
+  systemd.services.bench-monitor = {
+    serviceConfig.Type = "oneshot";
+    path = with pkgs; [ coreutils gawk ];
+    script = ''
+      # CPU temp: find k10temp or first available hwmon
+      temp="N/A"
+      for f in /sys/class/hwmon/hwmon*/temp1_input; do
+        if [ -r "$f" ]; then temp=$(cat "$f"); break; fi
+      done
+
+      # NVMe disk I/O (nvme1n1 = /data)
+      disk=$(awk '/nvme1n1 / {print "rd="$4" wr="$8}' /proc/diskstats)
+
+      # Network RX/TX bytes (sum all physical interfaces)
+      net=$(awk '/eth|enp|eno/ {rx+=$2; tx+=$10} END {print "rx="rx" tx="tx}' /proc/net/dev)
+
+      echo "$(date -uIs) cpu=$(cat /sys/devices/system/cpu/cpu0/cpufreq/scaling_cur_freq) temp=$temp load=$(cat /proc/loadavg) $disk $net" >> /data/system-metrics.log
+    '';
+  };
+  systemd.timers.bench-monitor = {
+    wantedBy = [ "timers.target" ];
+    timerConfig.OnCalendar = "*:*:0/10";
+  };
+
   users.groups.perf = { };
 
   users.users.github-runner = {
