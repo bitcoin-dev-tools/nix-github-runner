@@ -44,6 +44,46 @@
     setuid = true;
   };
 
+  # Wrapper to allow fstrim without full sudo access
+  # Ensures consistent SSD write performance across benchmark runs
+  # Uses FITRIM ioctl directly (like drop-caches) since execl drops setuid
+  security.wrappers.fstrim = {
+    source = "${
+      pkgs.stdenv.mkDerivation {
+        name = "fstrim";
+        dontUnpack = true;
+        buildPhase = ''
+          $CC -x c -o fstrim-wrapper - <<'EOF'
+          #include <stdio.h>
+          #include <unistd.h>
+          #include <fcntl.h>
+          #include <sys/ioctl.h>
+          #include <linux/fs.h>
+          int main(int argc, char *argv[]) {
+            if (argc != 2) {
+              fprintf(stderr, "Usage: fstrim <path>\n");
+              return 1;
+            }
+            int fd = open(argv[1], O_RDONLY);
+            if (fd < 0) { perror(argv[1]); return 1; }
+            struct fstrim_range range = { .start = 0, .len = (unsigned long long)-1, .minlen = 0 };
+            if (ioctl(fd, FITRIM, &range)) { perror("FITRIM"); close(fd); return 1; }
+            close(fd);
+            return 0;
+          }
+          EOF
+        '';
+        installPhase = ''
+          mkdir -p $out/bin
+          cp fstrim-wrapper $out/bin/fstrim
+        '';
+      }
+    }/bin/fstrim";
+    owner = "root";
+    group = "root";
+    setuid = true;
+  };
+
   users.groups.perf = { };
 
   users.users.github-runner = {
