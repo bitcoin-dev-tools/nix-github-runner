@@ -52,4 +52,7 @@ logs-seed host=github-runner:
 # Get logs from github-runner
 [group('live')]
 logs-runner type=ax52 host=github-runner:
-    ssh {{host}} "journalctl -f -u {{host}}-{{type}}.service"
+    ssh {{host}} "journalctl -f -u github-runner-{{type}}.service"
+
+logs host=github-runner:
+    ssh {{host}} "tail -F /data/runner_workspace/_temp/datadir/debug.log"
