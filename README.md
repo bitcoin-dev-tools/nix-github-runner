@@ -1,33 +1,44 @@
-# NixOS GitHub runner
+# NixOS GitHub Runner
 
-A configuration to deploy a NixOS GitHub self-hosted runner.
+A NixOS configuration for deploying a GitHub self-hosted runner.
 
 ## Introduction
 
-We can easily add self-hosted GitHub Action Runners to our account by deploying them with NixOS.
-To do this, first provision a VPS and ensure that you have root `ssh` capability on the host.
+This repository currently deploys a runner directly on the target NixOS host.
+It does not currently configure Firecracker or `microvm.nix` runners.
 
-Next, We can use [`nixos-anywhere`](https://github.com/nix-community/nixos-anywhere) to fork the kernel process, and install NixOS on the machine.
-This will also automatically install all packages and services described in the *flake.nix* and linked configurations.
+To use it, first provision a server and ensure that you have root `ssh` access
+to the host. Then use
+[`nixos-anywhere`](https://github.com/nix-community/nixos-anywhere) to install
+NixOS from the flake. This installs the packages and services described in
+`flake.nix` and the imported host configuration.
 
-Following this, all that remains is connecting your runner to your GitHub account/repository.
-This can be done by obtaining a runner token, from GitHub web UI:
+The GitHub runner token is managed with `sops-nix` from
+`secrets/default.yaml`, not by passing `GH_TOKEN` during rebuilds.
 
-    Settings > Actions > Runners > New self-hosted runner
-
-... and grabbing the token from the *configuration* section.
-
-Finally, we can re-deploy the server, this time including the github runner token.
+The configured runner is ephemeral and registers against the
+`bitcoin-dev-tools` GitHub organization.
 
 ## Initial deployment
 
-To initially deploy to a server, either select and existing *disk-config\*.nix*, or create a new one tailored to the target host.
-This example will use a Hetzner AX52 as target, which comes with 2 SSDs located at */dev/nvme1n1* and */dev/nvme0n1*.
+To initially deploy to a server, either select an existing `disk-config.nix`, or
+create a new one tailored to the target host. This example uses a Hetzner AX52,
+which comes with two SSDs located at `/dev/nvme1n1` and `/dev/nvme0n1`.
 
 ### Add your SSH key
 
-In order to be able to connect in to the remote host, we need to provision it with your SSH key.
-Modify the list of SSH keys at the top of *./modules/users.nix* to include your own before deploying.
+To connect to the remote host after installation, provision it with your SSH
+key. Modify the `ssh_keys` list in `modules/users/default.nix` before
+deploying.
+
+### Configure the runner token
+
+The runner token is read from `sops.secrets.runner_token`, configured in
+`modules/services/github-runner.nix` and encrypted in `secrets/default.yaml`.
+
+The token file should contain either a GitHub personal access token with
+self-hosted runner permissions, or a runner registration token. A PAT is
+preferred because registration tokens expire after one hour.
 
 ### Install NixOS
 
@@ -41,10 +52,6 @@ Or using `just`:
 ```bash
 just deploy ax52 <host>
 ```
-
-> [!NOTE]
-> This does not deploy a github runner token.
-> Re-run update after first deployment with a token to deploy it.
 
 ## Rebuild or update deployment
 
@@ -62,20 +69,14 @@ just dry-run ax52
 
 ```bash
 $ nix-shell -p nixos-rebuild
-[nix-shell:~]$ GH_TOKEN=<github runner token> nixos-rebuild switch --flake .#ax52 --target-host root@<ip_address>
+[nix-shell:~]$ nixos-rebuild switch --flake .#ax52 --target-host root@<ip_address>
 ```
 
 Or using `just`:
 
 ```bash
-export GH_TOKEN=<github token>
-
 just rebuild ax52 <host>
 ```
-
-> [!WARNING]
-> This token **is** stored in the nix store on the remote host.
-> This is simpler than using SOPS or other mechanisms, but allows any user on the remote host to view it.
 
 ## Adding a new runner type
 
