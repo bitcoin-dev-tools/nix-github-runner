@@ -19,12 +19,12 @@
 
     unitConfig = {
       RefuseManualStart = true;
-      RemainAfterExit = true;
     };
 
     serviceConfig = {
       Type = "oneshot";
       User = "root";
+      RemainAfterExit = true;
     };
 
     script = ''

@@ -182,6 +182,12 @@
               default = { };
             };
 
+            unitOverrides = lib.mkOption {
+              type = lib.types.attrs;
+              description = "Modify the systemd unit.";
+              default = { };
+            };
+
             package = lib.mkPackageOption pkgs "github-runner" { };
 
             ephemeral = lib.mkOption {

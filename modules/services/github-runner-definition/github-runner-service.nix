@@ -58,6 +58,7 @@
           "network.target"
           "network-online.target"
         ];
+        unitConfig = cfg.unitOverrides;
 
         environment = {
           HOME = workDir;

@@ -169,8 +169,6 @@
         1
         2
       ];
-      StartLimitBurst = 3;
-      StartLimitIntervalSec = 300;
       SuccessExitStatus = [
         0
         1
@@ -186,6 +184,10 @@
         "CAP_DAC_OVERRIDE"
         "CAP_SYS_ADMIN"  # for fstrim suid wrapper (FITRIM ioctl)
       ];
+    };
+    unitOverrides = {
+      StartLimitBurst = 3;
+      StartLimitIntervalSec = 300;
     };
   };
 }
