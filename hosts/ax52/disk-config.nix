@@ -2,7 +2,7 @@
 {
   disko.devices = {
     disk.disk1 = {
-      device = lib.mkDefault "/dev/nvme1n1";
+      device = lib.mkDefault "/dev/disk/by-id/nvme-Micron_3400_MTFDKBA1T0TFH_23103F00CF27";
       type = "disk";
       content = {
         type = "gpt";
@@ -34,7 +34,7 @@
       };
     };
     disk.disk2 = {
-      device = lib.mkDefault "/dev/nvme0n1";
+      device = lib.mkDefault "/dev/disk/by-id/nvme-SAMSUNG_MZVL21T0HCLR-00B00_S676NL0W816439";
       type = "disk";
       content = {
         type = "gpt";
