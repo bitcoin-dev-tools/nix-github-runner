@@ -34,6 +34,12 @@ sync type=ax52 host=github-runner:
     rsync -av --delete --exclude=result* --exclude=.git . {{host}}:/etc/nixos-config/
     ssh {{host}} "chown -R root:root /etc/nixos-config && cd /etc/nixos-config && nixos-rebuild switch --flake .#{{type}}"
 
+# Copy flake to remote and build for the next boot without activating
+[group('live')]
+sync-boot type=ax52 host=github-runner:
+    rsync -av --delete --exclude=result* --exclude=.git . {{host}}:/etc/nixos-config/
+    ssh {{host}} "chown -R root:root /etc/nixos-config && cd /etc/nixos-config && nixos-rebuild boot --flake .#{{type}}"
+
 # Rebuild a github CI runner on a machine
 [group('live')]
 rebuild type=ax52 host=github-runner:
