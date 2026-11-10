@@ -1,8 +1,8 @@
-{ config, pkgs, ... }:
+{ pkgs, ... }:
 {
   environment.systemPackages = with pkgs; [
     ccache
-    config.boot.kernelPackages.perf
+    perf
     flamegraph
     glibc.debug
     hyperfine
